@@ -2,6 +2,7 @@ import hashlib
 import os
 import shutil
 from pathlib import Path
+from typing import Optional
 from unittest import mock
 
 from django.conf import settings
@@ -60,8 +61,8 @@ def make_test_document(
     mime_type: str,
     original: str,
     original_filename: str,
-    archive: str = None,
-    archive_filename: str = None,
+    archive: Optional[str] = None,
+    archive_filename: Optional[str] = None,
 ):
     doc = document_class()
     doc.filename = original_filename
@@ -330,7 +331,7 @@ class TestMigrateArchiveFilesErrors(DirectoriesMixin, TestMigrations):
             self.performMigration,
         )
 
-    @mock.patch("documents.migrations.1012_fix_archive_files.parse_wrapper")
+    @mock.patch("documents.migrations.manual.fix_archive_files.parse_wrapper")
     def test_parser_error(self, m):
         m.side_effect = ParseError()
         Document = self.apps.get_model("documents", "Document")
@@ -395,7 +396,7 @@ class TestMigrateArchiveFilesErrors(DirectoriesMixin, TestMigrations):
         self.assertIsNone(doc1.archive_filename)
         self.assertIsNone(doc2.archive_filename)
 
-    @mock.patch("documents.migrations.1012_fix_archive_files.parse_wrapper")
+    @mock.patch("documents.migrations.manual.fix_archive_files.parse_wrapper")
     def test_parser_no_archive(self, m):
         m.side_effect = fake_parse_wrapper
 

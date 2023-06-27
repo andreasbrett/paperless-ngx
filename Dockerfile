@@ -21,7 +21,7 @@ RUN set -eux \
 # Comments:
 #  - pipenv dependencies are not left in the final image
 #  - pipenv can't touch the final image somehow
-FROM --platform=$BUILDPLATFORM docker.io/python:3.9-alpine as pipenv-base
+FROM --platform=$BUILDPLATFORM docker.io/python:3.11-alpine as pipenv-base
 
 WORKDIR /usr/src/pipenv
 
@@ -37,7 +37,7 @@ RUN set -eux \
 # Purpose: The final image
 # Comments:
 #  - Don't leave anything extra in here
-FROM docker.io/python:3.9-slim-bookworm as main-app
+FROM docker.io/python:3.11-slim-bookworm as main-app
 
 LABEL org.opencontainers.image.authors="paperless-ngx team <hello@paperless-ngx.com>"
 LABEL org.opencontainers.image.documentation="https://docs.paperless-ngx.com/"
@@ -174,8 +174,6 @@ ARG TARGETVARIANT
 
 # Can be workflow provided, defaults set for manual building
 ARG JBIG2ENC_VERSION=0.29
-ARG QPDF_VERSION=11.3.0
-ARG PIKEPDF_VERSION=7.2.0
 ARG PSYCOPG2_VERSION=2.9.6
 
 # Install the built packages from the installer library images
@@ -192,12 +190,9 @@ RUN set -eux \
     && cp ./jbig2enc/${JBIG2ENC_VERSION}/${TARGETARCH}${TARGETVARIANT}/jbig2 /usr/local/bin/ \
     && cp ./jbig2enc/${JBIG2ENC_VERSION}/${TARGETARCH}${TARGETVARIANT}/libjbig2enc* /usr/local/lib/ \
     && chmod a+x /usr/local/bin/jbig2 \
-  && echo "Installing pikepdf and dependencies" \
-    && python3 -m pip install --no-cache-dir ./pikepdf/${PIKEPDF_VERSION}/${TARGETARCH}${TARGETVARIANT}/*.whl \
-    && python3 -m pip list \
-  && echo "Installing psycopg2" \
-    && python3 -m pip install --no-cache-dir ./psycopg2/${PSYCOPG2_VERSION}/${TARGETARCH}${TARGETVARIANT}/psycopg2*.whl \
-    && python3 -m pip list \
+  # && echo "Installing psycopg2" \
+  #   && python3 -m pip install --no-cache-dir ./psycopg2/${PSYCOPG2_VERSION}/${TARGETARCH}${TARGETVARIANT}/psycopg2*.whl \
+  #   && python3 -m pip list \
   && echo "Cleaning up image layer" \
     && cd ../ \
     && rm -rf paperless-ngx \
@@ -214,7 +209,9 @@ COPY --from=pipenv-base /usr/src/pipenv/requirements.txt ./
 ARG BUILD_PACKAGES="\
   build-essential \
   git \
-  default-libmysqlclient-dev"
+  default-libmysqlclient-dev \
+  libpq-dev \
+  pkg-config"
 
 # hadolint ignore=DL3042
 RUN --mount=type=cache,target=/root/.cache/pip/,id=pip-cache \

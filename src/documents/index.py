@@ -3,6 +3,7 @@ import math
 import os
 from collections import Counter
 from contextlib import contextmanager
+from typing import Optional
 
 from dateutil.parser import isoparse
 from django.conf import settings
@@ -384,7 +385,12 @@ class DelayedMoreLikeThisQuery(DelayedQuery):
         return q, mask
 
 
-def autocomplete(ix: FileIndex, term: str, limit: int = 10, user: User = None):
+def autocomplete(
+    ix: FileIndex,
+    term: str,
+    limit: int = 10,
+    user: Optional[User] = None,
+):
     """
     Mimics whoosh.reading.IndexReader.most_distinctive_terms with permissions
     and without scoring
@@ -412,7 +418,7 @@ def autocomplete(ix: FileIndex, term: str, limit: int = 10, user: User = None):
     return terms
 
 
-def get_permissions_criterias(user: User = None):
+def get_permissions_criterias(user: Optional[User] = None):
     user_criterias = [query.Term("has_owner", False)]
     if user is not None:
         if user.is_superuser:  # superusers see all docs

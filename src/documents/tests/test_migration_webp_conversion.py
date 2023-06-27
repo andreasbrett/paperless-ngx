@@ -12,9 +12,9 @@ from documents.tests.utils import TestMigrations
 
 
 @mock.patch(
-    "documents.migrations.1021_webp_thumbnail_conversion.multiprocessing.pool.Pool.map",
+    "documents.migrations.manual.webp_thumbnails.Pool.map",
 )
-@mock.patch("documents.migrations.1021_webp_thumbnail_conversion.run_convert")
+@mock.patch("documents.migrations.manual.webp_thumbnails.run_convert")
 class TestMigrateWebPThumbnails(TestMigrations):
     migrate_from = "1020_merge_20220518_1839"
     migrate_to = "1021_webp_thumbnail_conversion"
